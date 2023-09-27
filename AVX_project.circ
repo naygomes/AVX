@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project source="3.8.0" version="1.0">
+  This file is intended to be loaded by Logisim-evolution v3.8.0(https://github.com/logisim-evolution/).
+
+  <lib desc="#Wiring" name="0">
+    <tool name="Pin">
+      <a name="appearance" val="classic"/>
+    </tool>
+  </lib>
+  <lib desc="#Gates" name="1"/>
+  <lib desc="#Plexers" name="2"/>
+  <lib desc="#Arithmetic" name="3"/>
+  <lib desc="#Memory" name="4"/>
+  <lib desc="#I/O" name="5"/>
+  <lib desc="#TTL" name="6"/>
+  <lib desc="#TCL" name="7"/>
+  <lib desc="#Base" name="8"/>
+  <lib desc="#BFH-Praktika" name="9"/>
+  <lib desc="#Input/Output-Extra" name="10"/>
+  <lib desc="#Soc" name="11"/>
+  <main name="main"/>
+  <options>
+    <a name="gateUndefined" val="ignore"/>
+    <a name="simlimit" val="1000"/>
+    <a name="simrand" val="0"/>
+  </options>
+  <mappings>
+    <tool lib="8" map="Button2" name="Poke Tool"/>
+    <tool lib="8" map="Button3" name="Menu Tool"/>
+    <tool lib="8" map="Ctrl Button1" name="Menu Tool"/>
+  </mappings>
+  <toolbar>
+    <tool lib="8" name="Poke Tool"/>
+    <tool lib="8" name="Edit Tool"/>
+    <tool lib="8" name="Wiring Tool"/>
+    <tool lib="8" name="Text Tool"/>
+    <sep/>
+    <tool lib="0" name="Pin"/>
+    <tool lib="0" name="Pin">
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+    </tool>
+    <sep/>
+    <tool lib="1" name="NOT Gate"/>
+    <tool lib="1" name="AND Gate"/>
+    <tool lib="1" name="OR Gate"/>
+    <tool lib="1" name="XOR Gate"/>
+    <tool lib="1" name="NAND Gate"/>
+    <tool lib="1" name="NOR Gate"/>
+    <sep/>
+    <tool lib="4" name="D Flip-Flop"/>
+    <tool lib="4" name="Register"/>
+  </toolbar>
+  <circuit name="main">
+    <a name="appearance" val="logisim_evolution"/>
+    <a name="circuit" val="main"/>
+    <a name="circuitnamedboxfixedsize" val="true"/>
+    <a name="simulationFrequency" val="1.0"/>
+    <comp lib="0" loc="(200,160)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+    </comp>
+    <comp lib="0" loc="(270,180)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+    </comp>
+    <comp lib="0" loc="(570,160)" name="Pin">
+      <a name="appearance" val="NewPins"/>
+      <a name="facing" val="west"/>
+      <a name="output" val="true"/>
+    </comp>
+    <comp loc="(540,160)" name="CLA_Adder">
+      <a name="appearance" val="logisim_evolution"/>
+    </comp>
+    <wire from="(200,160)" to="(320,160)"/>
+    <wire from="(270,180)" to="(320,180)"/>
+    <wire from="(540,160)" to="(570,160)"/>
+  </circuit>
+  <vhdl name="AVX">--------------------------------------------------------------------------------
+-- Project : AVX 
+-- File    : --
+-- Autor   : Alexandre Chiacchio e Nayara Gomes
+-- Date    : 28 de Setembro de 2023
+--
+--------------------------------------------------------------------------------
+-- Description : Somador/Subtrator Vetorial de 32 bits
+--
+--------------------------------------------------------------------------------
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY AVX IS
+  PORT (
+  ------------------------------------------------------------------------------
+  -- Entradas
+   	A_i        	: IN  std_logic_vector(31 DOWNTO 0); 	-- Operando A
+    	B_i        	: IN  std_logic_vector(31 DOWNTO 0); 	-- Operando B
+    	mode_i 		: IN  std_logic; 					-- Modo de operação
+    	vecSize_i 	: IN  std_logic_vector(1 DOWNTO 0); 	-- Tamanho do Vetor
+    	
+  ------------------------------------------------------------------------------
+  -- Saídas
+     S_o        	: OUT std_logic_vector(31 DOWNTO 0)     
+  );
+END AVX;
+
+--------------------------------------------------------------------------------
+-- Arquitetura
+--------------------------------------------------------------------------------
+
+ARCHITECTURE TypeArchitecture OF AVX IS
+
+signal B_s 	: std_logic_vector(31 DOWNTO 0);
+
+signal w_C 	: std_logic_vector(31 DOWNTO 0);
+signal w_G 	: std_logic_vector(31 DOWNTO 0);
+signal w_P 	: std_logic_vector(31 DOWNTO 0);
+
+signal w_SUM  	: std_logic_vector(31 DOWNTO 0);
+
+BEGIN
+
+-- Caso seja uma subtração, inverte-se o valor de B
+B_s &lt;= B_i WHEN (mode_i = '0') ELSE 
+	 NOT(B_i) WHEN (mode_i = '1');
+
+
+--Gera-se o carry de Geração (G) e de Propagação (P) para o carry lookahead
+GEN_CLA : FOR ii IN 0 TO 31 generate
+    w_G(ii) &lt;= A_i(ii) AND B_s(ii);
+    w_P(ii) &lt;= A_i(ii) OR B_s(ii);
+  
+END generate GEN_CLA;
+ 
+ 
+-- Realizamos as somas para chegar ao resultado final
+  GEN_ADDER : FOR jj IN 0 TO 31 generate
+    w_SUM (jj) &lt;= A_i(jj) XOR B_s(jj);
+  END generate GEN_ADDER;
+
+
+  S_o &lt;= w_SUM;
+
+
+END TypeArchitecture;
+</vhdl>
+  <vhdl name="CLA_Adder">library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity CLA_Adder is
+    Port (
+        A, B : in  STD_LOGIC;
+
+        Sum  : out STD_LOGIC
+    );
+end CLA_Adder;
+
+architecture Behavioral of CLA_Adder is
+begin
+    
+    Sum &lt;= A AND B;
+end Behavioral;
+</vhdl>
+</project>
