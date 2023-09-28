@@ -62,17 +62,17 @@
     <comp lib="0" loc="(270,180)" name="Pin">
       <a name="appearance" val="NewPins"/>
     </comp>
-    <comp lib="0" loc="(570,160)" name="Pin">
+    <comp lib="0" loc="(580,160)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="facing" val="west"/>
       <a name="output" val="true"/>
     </comp>
-    <comp loc="(540,160)" name="CLA_Adder">
+    <comp loc="(530,160)" name="AND_Gate">
       <a name="appearance" val="logisim_evolution"/>
     </comp>
-    <wire from="(200,160)" to="(320,160)"/>
-    <wire from="(270,180)" to="(320,180)"/>
-    <wire from="(540,160)" to="(570,160)"/>
+    <wire from="(200,160)" to="(310,160)"/>
+    <wire from="(270,180)" to="(310,180)"/>
+    <wire from="(530,160)" to="(580,160)"/>
   </circuit>
   <vhdl name="AVX">--------------------------------------------------------------------------------
 -- Project : AVX 
@@ -131,11 +131,95 @@ GEN_CLA : FOR ii IN 0 TO 31 generate
   
 END generate GEN_CLA;
  
- 
--- Realizamos as somas para chegar ao resultado final
-  GEN_ADDER : FOR jj IN 0 TO 31 generate
-    w_SUM (jj) &lt;= A_i(jj) XOR B_s(jj);
-  END generate GEN_ADDER;
+  -- Carry
+  w_C(0) &lt;= '0' when mode_i = '0' else
+  		'1';
+  
+CARRY_1p : FOR ii IN 1 TO 3 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_1p;
+  
+  w_C(4) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else  -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   w_G(3) or (w_P(3) and w_C(3));
+  			
+
+CARRY_2p : FOR ii IN 5 TO 7 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_2p;
+  
+  w_C(8) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else  -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   '0' when (vecSize_i = "01" and mode_i ='0') else -- adição 8 bits
+  		   '1' when (vecSize_i = "01" and mode_i ='1') else -- subtração 8 bits
+  		   w_G(7) or (w_P(7) and w_C(7));
+  
+  w_C(9) &lt;= w_G(8) or (w_P(8) and w_C(8));
+  w_C(10) &lt;= w_G(9) or (w_P(9) and w_C(9));
+  w_C(11) &lt;= w_G(10) or (w_P(10) and w_C(10));
+
+CARRY_3p : FOR ii IN 9 TO 11 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_3p;
+
+    w_C(12) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else   -- subtração 4 bits
+  			w_G(11) or (w_P(11) and w_C(11));
+
+CARRY_4p : FOR ii IN 13 TO 15 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_4p;
+  
+  w_C(16) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   '0' when (vecSize_i = "01" and mode_i ='0') else -- adição 8 bits
+  		   '1' when (vecSize_i = "01" and mode_i ='1') else -- subtração 8 bits
+  		   '0' when (vecSize_i = "10" and mode_i ='0') else -- adição 16 bits
+  		   '1' when (vecSize_i = "10" and mode_i ='1') else -- subtração 16 bits
+  		   w_G(15) or (w_P(15) and w_C(15));
+
+CARRY_5p : FOR ii IN 17 TO 19 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_5p;
+  
+  w_C(20) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  			w_G(19) or (w_P(19) and w_C(19));
+
+CARRY_6p : FOR ii IN 21 TO 23 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_6p;
+  
+  w_C(24) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   '0' when (vecSize_i = "01" and mode_i ='0') else -- adição 8 bits
+  		   '1' when (vecSize_i = "01" and mode_i ='1') else -- subtração 8 bits
+  			w_G(23) or (w_P(23) and w_C(23));
+
+CARRY_7p : FOR ii IN 25 TO 27 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_7p;
+  			
+  w_C(28) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  			w_G(27) or (w_P(27) and w_C(27));
+
+CARRY_8p : FOR ii IN 29 TO 31 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-1) and w_C(ii-1));
+  
+END generate CARRY_8p;
+
+--faz as somas
+  GEN_ADDER : for kk in 0 to 31 generate
+    w_SUM (kk) &lt;= A_i(kk) xor B_s(kk) xor w_C(kk);
+  end generate GEN_ADDER;
 
 
   S_o &lt;= w_SUM;
@@ -143,23 +227,130 @@ END generate GEN_CLA;
 
 END TypeArchitecture;
 </vhdl>
-  <vhdl name="CLA_Adder">library IEEE;
+  <vhdl name="AND_Gate">library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity CLA_Adder is
+entity AND_Gate is
     Port (
         A, B : in  STD_LOGIC;
-
-        Sum  : out STD_LOGIC
+        Y    : out STD_LOGIC
     );
-end CLA_Adder;
+end AND_Gate;
 
-architecture Behavioral of CLA_Adder is
+architecture Behavioral of AND_Gate is
 begin
-    
-    Sum &lt;= A AND B;
+    Y &lt;= A AND B;
 end Behavioral;
+</vhdl>
+  <vhdl name="AVX_16b">--------------------------------------------------------------------------------
+-- Project :
+-- File    :
+-- Autor   :
+-- Date    :
+--
+--------------------------------------------------------------------------------
+-- Description :
+--
+--------------------------------------------------------------------------------
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+
+ENTITY AVX_16b IS
+  PORT (
+  ------------------------------------------------------------------------------
+  -- Entradas
+   	A_i        	: IN  std_logic_vector(15 DOWNTO 0); 	-- Operando A
+    	B_i        	: IN  std_logic_vector(15 DOWNTO 0); 	-- Operando B
+    	mode_i 		: IN  std_logic; 					-- Modo de operação
+    	vecSize_i 	: IN  std_logic_vector(1 DOWNTO 0); 	-- Tamanho do Vetor
+    	
+  ------------------------------------------------------------------------------
+  -- Saídas
+     S_o        	: OUT std_logic_vector(15 DOWNTO 0)     
+  );
+END AVX_16b;
+
+--------------------------------------------------------------------------------
+-- Arquitetura
+--------------------------------------------------------------------------------
+
+ARCHITECTURE TypeArchitecture OF AVX_16b IS
+
+signal B_s 	: std_logic_vector(15 DOWNTO 0);
+
+signal w_C 	: std_logic_vector(15 DOWNTO 0);
+signal w_G 	: std_logic_vector(15 DOWNTO 0);
+signal w_P 	: std_logic_vector(15 DOWNTO 0);
+
+signal w_SUM  	: std_logic_vector(15 DOWNTO 0);
+
+BEGIN
+
+-- Caso seja uma subtração, inverte-se o valor de B
+B_s &lt;= B_i WHEN (mode_i = '0') ELSE 
+	 NOT(B_i) WHEN (mode_i = '1');
+
+
+--Gera-se o carry de Geração (G) e de Propagação (P) para o carry lookahead
+GEN_CLA : FOR ii IN 0 TO 15 generate
+    w_G(ii) &lt;= A_i(ii) AND B_s(ii);
+    w_P(ii) &lt;= A_i(ii) OR B_s(ii);
+  
+END generate GEN_CLA;
+ 
+  -- Carry
+  w_C(0) &lt;= '0' when mode_i = '0' else
+  		'1';
+
+CARRY_4b : FOR ii IN 1 TO 3 generate
+    w_C(ii) &lt;= w_G(ii-1) or (w_P(ii-2) and w_C(ii-3));
+  
+END generate CARRY_4b;
+
+  w_C(4) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   w_G(3) or (w_P(3) and w_C(3));
+  			
+  w_C(5) &lt;= w_G(4) or (w_P(4) and w_C(4));
+  w_C(6) &lt;= w_G(5) or (w_P(5) and w_C(5));
+  w_C(7) &lt;= w_G(6) or (w_P(6) and w_C(6));
+  
+  w_C(8) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   '0' when (vecSize_i = "01" and mode_i ='0') else -- adição 8 bits
+  		   '1' when (vecSize_i = "01" and mode_i ='1') else -- subtração 8 bits
+  		   w_G(7) or (w_P(7) and w_C(7));
+  
+  w_C(9) &lt;= w_G(8) or (w_P(8) and w_C(8));
+  w_C(10) &lt;= w_G(9) or (w_P(9) and w_C(9));
+  w_C(11) &lt;= w_G(10) or (w_P(10) and w_C(10));
+  w_C(12) &lt;= w_G(11) or (w_P(11) and w_C(11));
+  w_C(13) &lt;= w_G(12) or (w_P(12) and w_C(12));
+  w_C(14) &lt;= w_G(13) or (w_P(13) and w_C(13));
+  w_C(15) &lt;= w_G(14) or (w_P(14) and w_C(14));
+  
+  w_C(16) &lt;= '0' when (vecSize_i = "00" and mode_i ='0') else -- adição 4 bits
+  		   '1' when (vecSize_i = "00" and mode_i ='1') else -- subtração 4 bits
+  		   '0' when (vecSize_i = "01" and mode_i ='0') else -- adição 8 bits
+  		   '1' when (vecSize_i = "01" and mode_i ='1') else -- subtração 8 bits
+  		   '0' when (vecSize_i = "10" and mode_i ='0') else -- adição 16 bits
+  		   '1' when (vecSize_i = "10" and mode_i ='1') else -- subtração 16 bits
+  		   w_G(15) or (w_P(15) and w_C(15));
+ 
+  
+--faz as somas
+  GEN_ADDER : for kk in 0 to 16 generate
+    w_SUM (kk) &lt;= A_i(kk) xor B_s(kk) xor w_C(kk);
+  end generate GEN_ADDER;
+
+
+  S_o &lt;= w_SUM;
+
+
+END TypeArchitecture;
+
 </vhdl>
 </project>
